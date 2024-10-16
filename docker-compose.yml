@@ -1,0 +1,11 @@
+services:
+
+  # Must run in root mode to access USB devices
+  coral:
+    container_name: coral
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    devices:
+      - /dev/bus/usb:/dev/bus/usb
+    init: true
