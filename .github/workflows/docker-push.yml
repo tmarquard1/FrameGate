@@ -23,10 +23,13 @@ jobs:
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
 
+    - name: Set environment variables
+      run: echo "REPO_NAME=${{ github.repository }}" | tr '[:upper:]' '[:lower:]' >> $GITHUB_ENV
+
     - name: Build and push Docker image
       uses: docker/build-push-action@v2
       with:
         context: ./
         file: ./Dockerfile
         push: true
-        tags: ghcr.io/${{ github.repository.toLowerCase() }}/coral:latest
+        tags: ghcr.io/${{ env.REPO_NAME }}/coral:latest
