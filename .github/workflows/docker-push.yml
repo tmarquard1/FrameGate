@@ -29,4 +29,4 @@ jobs:
         context: ./
         file: ./Dockerfile
         push: true
-        tags: ghcr.io/${{ github.repository }}/coral:latest
+        tags: ghcr.io/${{ github.repository.toLowerCase() }}/coral:latest
