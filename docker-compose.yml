@@ -3,9 +3,14 @@ services:
   # Must run in root mode to access USB devices
   coral:
     container_name: coral
+    image: ghcr.io/tmarquard1/framegate:latest
     build:
       context: ./
       dockerfile: Dockerfile
+      x-bake:
+        platforms:
+          - linux/arm64
+
     devices:
       - /dev/bus/usb:/dev/bus/usb
     init: true
