@@ -4,7 +4,7 @@ WORKDIR /home
 ENV HOME /home
 RUN cd ~
 RUN apt-get update
-RUN apt-get install -y git nano python3-pip python-dev pkg-config wget usbutils curl
+RUN apt-get install -y git nano python3-pip python-dev pkg-config wget usbutils curl libedgetpu1-std python3-pycoral
 
 RUN echo "deb https://packages.cloud.google.com/apt coral-edgetpu-stable main" \
 | tee /etc/apt/sources.list.d/coral-edgetpu.list
