@@ -17,4 +17,5 @@ services:
 
     devices:
       - /dev/bus/usb:/dev/bus/usb
+      - /dev/vchiq:/dev/vchiq
     init: true
