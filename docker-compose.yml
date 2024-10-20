@@ -19,7 +19,9 @@ services:
       - /dev/bus/usb:/dev/bus/usb
       - /dev/vchiq:/dev/vchiq
     volumes:
-      - /usr/bin:/opt/vc/lib
+      - /usr/lib/arm-linux-gnueabihf/:/usr/lib/arm-linux-gnueabihf/
+      - /usr/bin/rpicam-still:/usr/bin/rpicam-still
+      # - /run/udev:/run/udev:ro
     environment:
-      - LD_LIBRARY_PATH=/opt/vc/lib
+      - LD_LIBRARY_PATH=/usr/lib/arm-linux-gnueabihf
     init: true
