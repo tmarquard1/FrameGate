@@ -1,17 +1,19 @@
-FROM debian:10
+FROM python:3.8
 
 WORKDIR /home
 ENV HOME /home
 RUN cd ~
 RUN apt-get update
-RUN apt-get install -y git nano python3-pip python-dev pkg-config wget usbutils curl 
+RUN apt-get install -y git nano pkg-config wget usbutils curl gnupg
 
 RUN echo "deb https://packages.cloud.google.com/apt coral-edgetpu-stable main" \
 | tee /etc/apt/sources.list.d/coral-edgetpu.list
 RUN curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add -
 RUN apt-get update
-RUN apt-get install -y edgetpu-examples 
+# RUN apt-get install -y edgetpu-examples 
 RUN apt-get install -y libedgetpu1-std
+# Install python3-tflite-runtime manually
+#RUN apt-get install -y python3-tflite-runtime=2.5.0.post1
 RUN apt-get install -y python3-pycoral
 ENTRYPOINT ["tail", "-f", "/dev/null"]
 

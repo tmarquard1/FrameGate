@@ -24,3 +24,5 @@ https://www.tensorflow.org/hub/tutorials/movinet
 https://coral.ai/docs/edgetpu/models-intro/#compatibility-overview
 
 https://coral.ai/docs/accelerator/get-started/#next-steps
+
+https://projects.raspberrypi.org/en/projects/getting-started-with-picamera/7

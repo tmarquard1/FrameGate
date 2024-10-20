@@ -17,13 +17,13 @@ services:
 
     devices:
       - /dev/bus/usb:/dev/bus/usb
-      - /dev/vchiq:/dev/vchiq
-    volumes:
+      # - /dev/vchiq:/dev/vchiq
+    # volumes:
       # - /usr/lib/aarch64-linux-gnu/rpicam_app.so.1.5.0:/usr/lib/aarch64-linux-gnu/rpicam_app.so.1.5.0
       # - /usr/lib/aarch64-linux-gnu/libcamera.so.0.3:/usr/lib/aarch64-linux-gnu/libcamera.so.0.3
       # - /usr/lib/aarch64-linux-gnu/libboost_program_options.so.1.74.0:/usr/lib/aarch64-linux-gnu/libboost_program_options.so.1.74.0
-      - /usr/bin/rpicam-still:/usr/bin/rpicam-still
-      - /usr/lib/aarch64-linux-gnu:/usr/host-libs
+      # - /usr/bin/rpicam-still:/usr/bin/rpicam-still
+      # - /usr/lib/aarch64-linux-gnu:/usr/host-libs
       # - /run/udev:/run/udev:ro
     # environment:
     # - LD_LIBRARY_PATH=/usr/host-libs:/usr/host-libs/pulseaudio:$LD_LIBRARY_PATH
