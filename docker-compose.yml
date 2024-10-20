@@ -18,4 +18,8 @@ services:
     devices:
       - /dev/bus/usb:/dev/bus/usb
       - /dev/vchiq:/dev/vchiq
+    volumes:
+      - /opt/vc:/opt/vc
+    environment:
+      - LD_LIBRARY_PATH=/opt/vc/lib
     init: true
