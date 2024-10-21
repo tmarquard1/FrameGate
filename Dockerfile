@@ -1,4 +1,4 @@
-FROM python:3.8
+FROM python:3.9
 
 WORKDIR /home
 ENV HOME /home
@@ -29,9 +29,10 @@ RUN apt-get update
 # Install Edge TPU runtime
 RUN apt-get install -y libedgetpu1-std
 
+# RUN apt-get install -y python3-pycoral
 # Install python3-pycoral and tflite_runtime using pip
-RUN pip install --extra-index-url https://google-coral.github.io/py-repo/ tflite_runtime
-RUN pip install pycoral
+RUN pip install https://github.com/google-coral/pycoral/releases/download/v2.0.0/tflite_runtime-2.5.0.post1-cp39-cp39-linux_aarch64.whl
+RUN pip install https://github.com/google-coral/pycoral/releases/download/v2.0.0/pycoral-2.0.0-cp39-cp39-linux_aarch64.whl
 
 # Verify installation
 RUN python3 --version && pip --version
