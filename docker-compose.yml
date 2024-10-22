@@ -15,9 +15,14 @@ services:
         cache-to:
           - mode=max,image-manifest=true,oci-mediatypes=true,type=registry,ref=ghcr.io/tmarquard1/framegate:cache
 
-    devices:
-      - /dev/bus/usb:/dev/bus/usb
-      # - /dev/vchiq:/dev/vchiq
+    # devices:
+    #   - /dev/bus/usb:/dev/bus/usb
+    volumes:
+      - .:/home
+      
+    init: true
+
+# - /dev/vchiq:/dev/vchiq
     # volumes:
       # - /usr/lib/aarch64-linux-gnu/rpicam_app.so.1.5.0:/usr/lib/aarch64-linux-gnu/rpicam_app.so.1.5.0
       # - /usr/lib/aarch64-linux-gnu/libcamera.so.0.3:/usr/lib/aarch64-linux-gnu/libcamera.so.0.3
@@ -28,6 +33,6 @@ services:
     # environment:
     # - LD_LIBRARY_PATH=/usr/host-libs:/usr/host-libs/pulseaudio:$LD_LIBRARY_PATH
     #   - LD_LIBRARY_PATH=/usr/rpi/
-    init: true
+
 
     # put /Users/tmarquard/Documents/Personal/CSU\ Graduate\ School/FrameGate/docker-compose.yml /home/tmarquard/Documents/FrameGate/docker-compose.yml
