@@ -17,8 +17,8 @@ services:
 
     # devices:
     #   - /dev/bus/usb:/dev/bus/usb
-    volumes:
-      - .:/home
+    # volumes:
+    #   - .:/home
       
     init: true
 
