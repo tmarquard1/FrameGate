@@ -34,13 +34,22 @@ RUN apt-get install -y libedgetpu1-std
 RUN pip install https://github.com/google-coral/pycoral/releases/download/v2.0.0/tflite_runtime-2.5.0.post1-cp39-cp39-linux_aarch64.whl
 RUN pip install https://github.com/google-coral/pycoral/releases/download/v2.0.0/pycoral-2.0.0-cp39-cp39-linux_aarch64.whl
 
+COPY requirements.txt requirements.txt
+RUN pip install -r requirements.txt
+
 # Verify installation
 RUN python3 --version && pip --version
 
 # Clean up
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 
-ENTRYPOINT ["tail", "-f", "/dev/null"]
+COPY coral/inference.py coral/inference.py
+
+EXPOSE 8000
+# uvicorn coral.inference:app --host 0.0.0.0 --port 8000 --reload
+ENTRYPOINT [ "uvicorn", "coral.inference:app", "--host", "0.0.0.0", "--port", "8000", "--reload" ]
+
+#ENTRYPOINT ["tail", "-f", "/dev/null"]
 
 # Example command to run the model
 # python3 /usr/share/edgetpu/examples/classify_image.py --model /usr/share/edgetpu/examples/models/mobilenet_v2_1.0_224_inat_bird_quant_edgetpu.tflite --label /usr/share/edgetpu/examples/models/inat_bird_labels.txt --image /usr/share/edgetpu/examples/images/bird.bmp
