@@ -20,10 +20,6 @@ with open('imagenet_labels.txt', 'r') as f:
 async def predict(file: UploadFile = File(...)):
     contents = await file.read()
     img = Image.open(io.BytesIO(contents)).resize((224, 224))
-    img_array = np.array(img, dtype=np.float32)
-    img_array = np.expand_dims(img_array, axis=0)
-    img_array = (img_array / 127.5) - 1  # Normalize to [-1, 1]
-    # img_array = preprocess_input(img_array)
 
     common.set_input(interpreter, img)
     interpreter.invoke()
