@@ -34,6 +34,9 @@ RUN apt-get install -y libedgetpu1-std
 RUN pip install https://github.com/google-coral/pycoral/releases/download/v2.0.0/tflite_runtime-2.5.0.post1-cp39-cp39-linux_aarch64.whl
 RUN pip install https://github.com/google-coral/pycoral/releases/download/v2.0.0/pycoral-2.0.0-cp39-cp39-linux_aarch64.whl
 
+# Download the mobilenet model
+RUN wget -O mobilenet_v1_1.0_224_edgetpu.tflite https://dl.google.com/coral/canned_models/mobilenet_v1_1.0_224_quant_edgetpu.tflite
+
 COPY requirements.txt requirements.txt
 RUN pip install -r requirements.txt
 
