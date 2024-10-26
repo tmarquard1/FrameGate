@@ -25,7 +25,7 @@ async def predict(file: UploadFile = File(...)):
     img_array = (img_array / 127.5) - 1  # Normalize to [-1, 1]
     # img_array = preprocess_input(img_array)
 
-    common.set_input(interpreter, img_array)
+    common.set_input(interpreter, img)
     interpreter.invoke()
     classes = classify.get_classes(interpreter, top_k=3)
     print(classes)

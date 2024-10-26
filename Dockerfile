@@ -35,8 +35,8 @@ RUN pip install https://github.com/google-coral/pycoral/releases/download/v2.0.0
 RUN pip install https://github.com/google-coral/pycoral/releases/download/v2.0.0/pycoral-2.0.0-cp39-cp39-linux_aarch64.whl
 
 # Download the mobilenet model
-RUN wget -O mobilenet_v1_1.0_224_edgetpu.tflite https://dl.google.com/coral/canned_models/mobilenet_v1_1.0_224_quant_edgetpu.tflite
-RUN wget -O imagenet_labels.txt https://dl.google.com/coral/canned_models/imagenet_labels.txt
+RUN wget -O mobilenet_v1_1.0_224_edgetpu.tflite https://dl.google.com/coral/canned_models/mobilenet_v2_1.0_224_inat_bird_quant_edgetpu.tflite
+RUN wget -O imagenet_labels.txt https://dl.google.com/coral/canned_models/inat_bird_labels.txt
 
 
 COPY requirements.txt requirements.txt
