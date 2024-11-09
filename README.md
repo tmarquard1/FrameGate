@@ -26,3 +26,13 @@ https://coral.ai/docs/edgetpu/models-intro/#compatibility-overview
 https://coral.ai/docs/accelerator/get-started/#next-steps
 
 https://projects.raspberrypi.org/en/projects/getting-started-with-picamera/7
+
+https://www.kaggle.com/datasets/sharjeelmazhar/human-activity-recognition-video-dataset
+
+https://www.linuxfoundation.org/hubfs/Research%20Reports/Open_Source_and_Energy_Interoperability_2024_082124a.pdf?hsLang=en&__hstc=138353967.6a396ecf6cf2c4023ead0e8eab836040.1731076407581.1731076407581.1731076407581.1&__hssc=138353967.2.1731076407581&__hsfp=301312424
+
+https://new.nsf.gov/news/new-material-computer-chips-could-reduce-energy#:~:text=It's%20estimated%20that%20the%20information,world's%20power%20generation%20by%202030.
+
+https://www.sentinelone.com/cybersecurity-101/cybersecurity/cyber-security-statistics/
+
+https://www.mybib.com/tools/ieee-citation-generator
