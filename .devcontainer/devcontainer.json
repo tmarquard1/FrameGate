@@ -1,0 +1,21 @@
+{
+    "name": "Python TensorFlow Dev Container",
+    "image": "mcr.microsoft.com/vscode/devcontainers/python:3.10", // consider 3.10
+    // "features": {
+    //     "ghcr.io/devcontainers/features/docker-in-docker:1": {}
+    // },
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "ms-python.python",
+                "ms-python.vscode-pylance",
+                "ms-toolsai.jupyter",
+                "github.copilot"
+            ]
+        }
+    }
+    // "postCreateCommand": "pip install tensorflow",
+    // "settings": {
+    //     "python.pythonPath": "/usr/local/bin/python"
+    // }
+}
