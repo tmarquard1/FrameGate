@@ -2,3 +2,7 @@
 .cache/
 .keras/
 coral/__pycache__/
+HAR_Dataset.zip
+HumanActivityRecognition-VideoDataset/
+myenv/
+.DS_Store
