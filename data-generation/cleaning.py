@@ -53,13 +53,33 @@ model = hub.load(hub_url)
 init_states = model.init_states(clapping[tf.newaxis, ...].shape)
 states = init_states
 
-# Iterate over each frame and print top 5 predictions
-for n in tqdm.tqdm(range(len(clapping))):
+# Iterate over each frame and print top 5 predictions for the first and nth frames
+for n in tqdm.tqdm(range(1, len(clapping))):
+    # Initialize states
+    init_states = model.init_states(clapping[tf.newaxis, ...].shape)
+    states = init_states
+
+    # Process the first frame
+    inputs = states
+    inputs['image'] = clapping[tf.newaxis, 0:1, ...]
+    logits, states = model(inputs)
+    probs = tf.nn.softmax(logits[0], axis=-1)
+    print(f'Frame {n+1} (first frame):')
+    for label, p in get_top_k(probs):
+        print(f'{label:20s}: {p:.3f}')
+    print()
+
+    # Reset states
+    states = init_states
+
+    # Process the nth frame
     inputs = states
     inputs['image'] = clapping[tf.newaxis, n:n+1, ...]
     logits, states = model(inputs)
     probs = tf.nn.softmax(logits[0], axis=-1)
-    print(f'Frame {n+1}:')
+    print(f'Frame {n+1} (nth frame):')
     for label, p in get_top_k(probs):
         print(f'{label:20s}: {p:.3f}')
     print()
+
+    # How could I use the logits to get the perceived change in state?
