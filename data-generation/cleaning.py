@@ -49,11 +49,8 @@ version = '3'
 hub_url = f'https://tfhub.dev/tensorflow/movinet/{id}/{mode}/kinetics-600/classification/{version}'
 model = hub.load(hub_url)
 
-# Initialize states
-init_states = model.init_states(clapping[tf.newaxis, ...].shape)
-states = init_states
-
-# Iterate over each frame and print top 5 predictions for the first and nth frames
+# Iterate over each frame and evaluate impact
+k = 5  # Number of top labels to consider
 for n in tqdm.tqdm(range(1, len(clapping))):
     # Initialize states
     init_states = model.init_states(clapping[tf.newaxis, ...].shape)
@@ -63,11 +60,7 @@ for n in tqdm.tqdm(range(1, len(clapping))):
     inputs = states
     inputs['image'] = clapping[tf.newaxis, 0:1, ...]
     logits, states = model(inputs)
-    probs = tf.nn.softmax(logits[0], axis=-1)
-    print(f'Frame {n+1} (first frame):')
-    for label, p in get_top_k(probs):
-        print(f'{label:20s}: {p:.3f}')
-    print()
+    probs_first = tf.nn.softmax(logits[0], axis=-1)
 
     # Reset states
     states = init_states
@@ -76,10 +69,19 @@ for n in tqdm.tqdm(range(1, len(clapping))):
     inputs = states
     inputs['image'] = clapping[tf.newaxis, n:n+1, ...]
     logits, states = model(inputs)
-    probs = tf.nn.softmax(logits[0], axis=-1)
-    print(f'Frame {n+1} (nth frame):')
-    for label, p in get_top_k(probs):
-        print(f'{label:20s}: {p:.3f}')
-    print()
+    probs_nth = tf.nn.softmax(logits[0], axis=-1)
 
-    # How could I use the logits to get the perceived change in state?
+    # Get top k labels for the nth frame
+    top_k_labels_probs = get_top_k(probs_nth, k=k)
+    top_k_labels = [label for label, _ in top_k_labels_probs]
+
+    # Calculate the difference in probabilities for the top k labels
+    diff_probs = probs_nth - probs_first
+    top_k_diff_probs = {label: diff_probs[KINETICS_600_LABELS == label][0].numpy() for label in top_k_labels}
+    
+    # Print the probability changes for the top k labels
+    print(f'Frame {n+1} impact:')
+    for label in top_k_labels:
+        print(f'{label:20s}: {top_k_diff_probs[label]:.3f}')
+    print()
+        # How could I use the logits to get the perceived change in state?
