@@ -5,6 +5,9 @@ import tensorflow as tf
 import tensorflow_hub as hub
 import tqdm
 import cv2
+import os
+import csv
+import matplotlib.pyplot as plt
 
 # Load labels
 labels_path = tf.keras.utils.get_file(
@@ -49,8 +52,16 @@ version = '3'
 hub_url = f'https://tfhub.dev/tensorflow/movinet/{id}/{mode}/kinetics-600/classification/{version}'
 model = hub.load(hub_url)
 
+# Prepare CSV file
+csv_file = open('impact.csv', mode='w', newline='')
+csv_writer = csv.writer(csv_file)
+csv_writer.writerow(['Video', 'Frame n', 'Frame m', 'Perceived Change', 'Top 1 Label', 'Top 1 Probability', 'Top 2 Label', 'Top 2 Probability', 'Top 3 Label', 'Top 3 Probability', 'Top 4 Label', 'Top 4 Probability', 'Top 5 Label', 'Top 5 Probability'])
+
 # Iterate over each frame and evaluate impact
 k = 5  # Number of top labels to consider
+
+impact = []
+
 for n in tqdm.tqdm(range(1, len(clapping))):
     # Initialize states
     init_states = model.init_states(clapping[tf.newaxis, ...].shape)
@@ -74,6 +85,7 @@ for n in tqdm.tqdm(range(1, len(clapping))):
     # Get top k labels for the nth frame
     top_k_labels_probs = get_top_k(probs_nth, k=k)
     top_k_labels = [label for label, _ in top_k_labels_probs]
+    top_k_probs = [prob for _, prob in top_k_labels_probs]
 
     # Calculate the difference in probabilities for the top k labels
     diff_probs = probs_nth - probs_first
@@ -84,4 +96,25 @@ for n in tqdm.tqdm(range(1, len(clapping))):
     for label in top_k_labels:
         print(f'{label:20s}: {top_k_diff_probs[label]:.3f}')
     print()
+
+    # Calculate the perceived change in state by summing the absolute values of the probability changes
+    perceived_change = tf.reduce_sum(tf.abs(diff_probs)).numpy()
+    print(f'Perceived change in state: {perceived_change:.3f}\n')
+
+    impact.append(perceived_change)
+
+    # Write the perceived change, normalized perceived change, and top k labels and probabilities to the CSV file
+    csv_writer.writerow(['Clapping.mp4', '1',f'{n+1}', perceived_change] + [item for pair in zip(top_k_labels, top_k_probs) for item in pair])
+
+# Close the CSV file
+csv_file.close()
+
+# Create a graph of the impact and write it to a file
+plt.plot(impact)
+plt.xlabel('Frame')
+plt.ylabel('Impact')
+plt.title('Impact of each frame')
+plt.savefig('impact_plot.png')
+plt.show()
+
         # How could I use the logits to get the perceived change in state?

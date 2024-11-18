@@ -38,3 +38,7 @@ https://www.sentinelone.com/cybersecurity-101/cybersecurity/cyber-security-stati
 https://www.mybib.com/tools/ieee-citation-generator
 
 https://arxiv.org/abs/2103.11511
+
+https://www.tensorflow.org/tutorials/video/transfer_learning_with_movinet
+
+https://github.com/tensorflow/models/tree/master/official/vision
