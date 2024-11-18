@@ -62,49 +62,53 @@ k = 5  # Number of top labels to consider
 
 impact = []
 
-for n in tqdm.tqdm(range(1, len(clapping))):
-    # Initialize states
-    init_states = model.init_states(clapping[tf.newaxis, ...].shape)
-    states = init_states
+for n in tqdm.tqdm(range(0, len(clapping)-1)):
+    for m in tqdm.tqdm(range(n+1, len(clapping))):
+        # Initialize states
+        init_states = model.init_states(clapping[tf.newaxis, ...].shape)
+        states = init_states
 
-    # Process the first frame
-    inputs = states
-    inputs['image'] = clapping[tf.newaxis, 0:1, ...]
-    logits, states = model(inputs)
-    probs_first = tf.nn.softmax(logits[0], axis=-1)
+        # Process the nth frame
+        inputs = states
+        inputs['image'] = clapping[tf.newaxis, n:n+1, ...]
+        logits, states = model(inputs)
+        probs_nth = tf.nn.softmax(logits[0], axis=-1)
 
-    # Reset states
-    states = init_states
+        # Reset states
+        states = init_states
 
-    # Process the nth frame
-    inputs = states
-    inputs['image'] = clapping[tf.newaxis, n:n+1, ...]
-    logits, states = model(inputs)
-    probs_nth = tf.nn.softmax(logits[0], axis=-1)
+        # Process the mth frame
+        inputs = states
+        inputs['image'] = clapping[tf.newaxis, m:m+1, ...]
+        logits, states = model(inputs)
+        probs_mth = tf.nn.softmax(logits[0], axis=-1)
 
-    # Get top k labels for the nth frame
-    top_k_labels_probs = get_top_k(probs_nth, k=k)
-    top_k_labels = [label for label, _ in top_k_labels_probs]
-    top_k_probs = [prob for _, prob in top_k_labels_probs]
+        # Get top k labels for the mth frame
+        top_k_labels_probs = get_top_k(probs_mth, k=k)
+        top_k_labels = [label for label, _ in top_k_labels_probs]
+        top_k_probs = [prob for _, prob in top_k_labels_probs]
 
-    # Calculate the difference in probabilities for the top k labels
-    diff_probs = probs_nth - probs_first
-    top_k_diff_probs = {label: diff_probs[KINETICS_600_LABELS == label][0].numpy() for label in top_k_labels}
-    
-    # Print the probability changes for the top k labels
-    print(f'Frame {n+1} impact:')
-    for label in top_k_labels:
-        print(f'{label:20s}: {top_k_diff_probs[label]:.3f}')
-    print()
+        # Calculate the difference in probabilities for the top k labels
+        diff_probs = probs_mth - probs_nth
+        top_k_diff_probs = {label: diff_probs[KINETICS_600_LABELS == label][0].numpy() for label in top_k_labels}
+        
+        # Print the probability changes for the top k labels
+        print(f'Frame {n} -> {m} impact:')
+        for label in top_k_labels:
+            print(f'{label:20s}: {top_k_diff_probs[label]:.3f}')
+        print()
 
-    # Calculate the perceived change in state by summing the absolute values of the probability changes
-    perceived_change = tf.reduce_sum(tf.abs(diff_probs)).numpy()
-    print(f'Perceived change in state: {perceived_change:.3f}\n')
+        # Calculate the perceived change in state by summing the absolute values of the probability changes
+        perceived_change = tf.reduce_sum(tf.abs(diff_probs)).numpy()
+        print(f'Perceived change in state: {perceived_change:.3f}\n')
 
-    impact.append(perceived_change)
+        impact.append(perceived_change)
 
-    # Write the perceived change, normalized perceived change, and top k labels and probabilities to the CSV file
-    csv_writer.writerow(['Clapping.mp4', '1',f'{n+1}', perceived_change] + [item for pair in zip(top_k_labels, top_k_probs) for item in pair])
+        # Write the perceived change, normalized perceived change, and top k labels and probabilities to the CSV file
+        csv_writer.writerow(['Clapping.mp4', f'{n}',f'{m}', perceived_change] + [item for pair in zip(top_k_labels, top_k_probs) for item in pair])
+
+        # Clear the session
+    tf.keras.backend.clear_session()
 
 # Close the CSV file
 csv_file.close()
