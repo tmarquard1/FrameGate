@@ -83,7 +83,9 @@ def addVideoFramesToCsv(directory, file):
     # Prepare CSV file
     csv_file = open('impact.csv', mode='a', newline='')
     csv_writer = csv.writer(csv_file)
-    csv_writer.writerow(['Video', 'Frame n', 'Frame m', 'Perceived Change', 'Top 1 Label', 'Top 1 Probability', 'Top 2 Label', 'Top 2 Probability', 'Top 3 Label', 'Top 3 Probability', 'Top 4 Label', 'Top 4 Probability', 'Top 5 Label', 'Top 5 Probability'])
+    csv_writer.writerow(['Video', 'Frame n', 'Frame m', 'Perceived Change', 
+                         'Top 1 Label (n)', 'Top 1 Probability (n)', 'Top 2 Label (n)', 'Top 2 Probability (n)', 'Top 3 Label (n)', 'Top 3 Probability (n)', 'Top 4 Label (n)', 'Top 4 Probability (n)', 'Top 5 Label (n)', 'Top 5 Probability (n)',
+                         'Top 1 Label (m)', 'Top 1 Probability (m)', 'Top 2 Label (m)', 'Top 2 Probability (m)', 'Top 3 Label (m)', 'Top 3 Probability (m)', 'Top 4 Label (m)', 'Top 4 Probability (m)', 'Top 5 Label (m)', 'Top 5 Probability (m)'])
 
     # Iterate over each frame and evaluate impact
     k = 5  # Number of top labels to consider
@@ -100,25 +102,26 @@ def addVideoFramesToCsv(directory, file):
         inputs['image'] = video[tf.newaxis, n:n+1, ...]
         logits, state = model(inputs)
         probs_nth = tf.nn.softmax(logits[0], axis=-1)
+        top_k_labels_probs_nth = get_top_k(probs_nth, k=k)
+        top_k_labels_nth = [label for label, _ in top_k_labels_probs_nth]
+        top_k_probs_nth = [prob for _, prob in top_k_labels_probs_nth]
 
         # Process the mth frame
         inputs = state
         inputs['image'] = video[tf.newaxis, m:m+1, ...]
         logits, state = model(inputs)
         probs_mth = tf.nn.softmax(logits[0], axis=-1)
-
-        # Get top k labels for the mth frame
-        top_k_labels_probs = get_top_k(probs_mth, k=k)
-        top_k_labels = [label for label, _ in top_k_labels_probs]
-        top_k_probs = [prob for _, prob in top_k_labels_probs]
+        top_k_labels_probs_mth = get_top_k(probs_mth, k=k)
+        top_k_labels_mth = [label for label, _ in top_k_labels_probs_mth]
+        top_k_probs_mth = [prob for _, prob in top_k_labels_probs_mth]
 
         # Calculate the difference in probabilities for the top k labels
         diff_probs = probs_mth - probs_nth
-        top_k_diff_probs = {label: diff_probs[KINETICS_600_LABELS == label][0].numpy() for label in top_k_labels}
+        top_k_diff_probs = {label: diff_probs[KINETICS_600_LABELS == label][0].numpy() for label in top_k_labels_mth}
         
         # Print the probability changes for the top k labels
         print(f'Frame {n} -> {m} impact:')
-        for label in top_k_labels:
+        for label in top_k_labels_mth:
             print(f'{label:20s}: {top_k_diff_probs[label]:.3f}')
         print()
 
@@ -129,7 +132,9 @@ def addVideoFramesToCsv(directory, file):
         impact.append(perceived_change)
 
         # Write the perceived change, normalized perceived change, and top k labels and probabilities to the CSV file
-        csv_writer.writerow([full_path, f'{n}',f'{m}', perceived_change] + [item for pair in zip(top_k_labels, top_k_probs) for item in pair])
+        csv_writer.writerow([full_path, f'{n}', f'{m}', perceived_change] + 
+                            [item for pair in zip(top_k_labels_nth, top_k_probs_nth) for item in pair] + 
+                            [item for pair in zip(top_k_labels_mth, top_k_probs_mth) for item in pair])
     csv_file.close()
 
 
