@@ -17,6 +17,7 @@ labels_path = tf.keras.utils.get_file(
 labels_path = pathlib.Path(labels_path)
 lines = labels_path.read_text().splitlines()
 KINETICS_600_LABELS = np.array([line.strip() for line in lines])
+data_directory = "../HumanActivityRecognition-VideoDataset"
 
 # Function to load mp4 file
 def load_mp4(file_path, image_size=(224, 224)):
@@ -42,35 +43,55 @@ def get_top_k(probs, k=5, label_map=KINETICS_600_LABELS):
     top_probs = tf.gather(probs, top_predictions, axis=-1).numpy()
     return tuple(zip(top_labels, top_probs))
 
-# Load video
-clapping = load_mp4("Clapping.mp4")
+def getAllFilesInDirectory(directory):
+    files = []
+    # List all files and subdirectories in the specified directory
+    for entry in os.listdir(directory):
+        full_path = os.path.join(directory, entry)
+        if os.path.isfile(full_path) and entry.endswith(".mp4"):
+            # If it's a file and ends with .mp4, add its relative path
+            files.append(entry)
+        elif os.path.isdir(full_path):
+            # If it's a subdirectory, list its files
+            for sub_entry in os.listdir(full_path):
+                sub_full_path = os.path.join(full_path, sub_entry)
+                if os.path.isfile(sub_full_path) and sub_entry.endswith(".mp4"):
+                    # Add the relative path of the file
+                    files.append(os.path.join(entry, sub_entry))
+    return files
 
-# Load model
-id = 'a2'
-mode = 'stream'
-version = '3'
-hub_url = f'https://tfhub.dev/tensorflow/movinet/{id}/{mode}/kinetics-600/classification/{version}'
-model = hub.load(hub_url)
 
-# Prepare CSV file
-csv_file = open('impact.csv', mode='w', newline='')
-csv_writer = csv.writer(csv_file)
-csv_writer.writerow(['Video', 'Frame n', 'Frame m', 'Perceived Change', 'Top 1 Label', 'Top 1 Probability', 'Top 2 Label', 'Top 2 Probability', 'Top 3 Label', 'Top 3 Probability', 'Top 4 Label', 'Top 4 Probability', 'Top 5 Label', 'Top 5 Probability'])
+def addVideoFramesToCsv(directory, file):
+    full_path = os.path.join(directory, file)
+    # Load video
+    video = load_mp4(full_path)
 
-# Iterate over each frame and evaluate impact
-k = 5  # Number of top labels to consider
+    # Load model
+    id = 'a2'
+    mode = 'stream'
+    version = '3'
+    hub_url = f'https://tfhub.dev/tensorflow/movinet/{id}/{mode}/kinetics-600/classification/{version}'
+    model = hub.load(hub_url)
 
-impact = []
+    # Prepare CSV file
+    csv_file = open('impact.csv', mode='a', newline='')
+    csv_writer = csv.writer(csv_file)
+    csv_writer.writerow(['Video', 'Frame n', 'Frame m', 'Perceived Change', 'Top 1 Label', 'Top 1 Probability', 'Top 2 Label', 'Top 2 Probability', 'Top 3 Label', 'Top 3 Probability', 'Top 4 Label', 'Top 4 Probability', 'Top 5 Label', 'Top 5 Probability'])
 
-for n in tqdm.tqdm(range(0, len(clapping)-1)):
-    for m in tqdm.tqdm(range(n+1, len(clapping))):
+    # Iterate over each frame and evaluate impact
+    k = 5  # Number of top labels to consider
+
+    impact = []
+
+    n=0
+    for m in tqdm.tqdm(range(n+1, len(video))):
         # Initialize states
-        init_states = model.init_states(clapping[tf.newaxis, ...].shape)
+        init_states = model.init_states(video[tf.newaxis, ...].shape)
         states = init_states
 
         # Process the nth frame
         inputs = states
-        inputs['image'] = clapping[tf.newaxis, n:n+1, ...]
+        inputs['image'] = video[tf.newaxis, n:n+1, ...]
         logits, states = model(inputs)
         probs_nth = tf.nn.softmax(logits[0], axis=-1)
 
@@ -79,7 +100,7 @@ for n in tqdm.tqdm(range(0, len(clapping)-1)):
 
         # Process the mth frame
         inputs = states
-        inputs['image'] = clapping[tf.newaxis, m:m+1, ...]
+        inputs['image'] = video[tf.newaxis, m:m+1, ...]
         logits, states = model(inputs)
         probs_mth = tf.nn.softmax(logits[0], axis=-1)
 
@@ -105,20 +126,20 @@ for n in tqdm.tqdm(range(0, len(clapping)-1)):
         impact.append(perceived_change)
 
         # Write the perceived change, normalized perceived change, and top k labels and probabilities to the CSV file
-        csv_writer.writerow(['Clapping.mp4', f'{n}',f'{m}', perceived_change] + [item for pair in zip(top_k_labels, top_k_probs) for item in pair])
+        csv_writer.writerow([full_path, f'{n}',f'{m}', perceived_change] + [item for pair in zip(top_k_labels, top_k_probs) for item in pair])
+    csv_file.close()
 
-        # Clear the session
-    tf.keras.backend.clear_session()
 
-# Close the CSV file
-csv_file.close()
+files = getAllFilesInDirectory(data_directory)
+for file in files:
+    addVideoFramesToCsv(data_directory, file)
 
-# Create a graph of the impact and write it to a file
-plt.plot(impact)
-plt.xlabel('Frame')
-plt.ylabel('Impact')
-plt.title('Impact of each frame')
-plt.savefig('impact_plot.png')
-plt.show()
+# # Create a graph of the impact and write it to a file
+# plt.plot(impact)
+# plt.xlabel('Frame')
+# plt.ylabel('Impact')
+# plt.title('Impact of each frame')
+# plt.savefig('impact_plot.png')
+# plt.show()
 
         # How could I use the logits to get the perceived change in state?
