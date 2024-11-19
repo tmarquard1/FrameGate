@@ -19,6 +19,19 @@ lines = labels_path.read_text().splitlines()
 KINETICS_600_LABELS = np.array([line.strip() for line in lines])
 data_directory = "../HumanActivityRecognition-VideoDataset"
 
+# Download and save the model locally
+model_id = 'a2'
+model_mode = 'stream'
+model_version = '3'
+hub_url = f'https://tfhub.dev/tensorflow/movinet/{model_id}/{model_mode}/kinetics-600/classification/{model_version}'
+local_model_path = pathlib.Path('movinet_model')
+if not local_model_path.exists():
+    local_model_path.mkdir(parents=True, exist_ok=True)
+    model = hub.load(hub_url)
+    tf.saved_model.save(model, str(local_model_path))
+else:
+    model = tf.saved_model.load(str(local_model_path))
+
 # Function to load mp4 file
 def load_mp4(file_path, image_size=(224, 224)):
     cap = cv2.VideoCapture(file_path)
@@ -67,12 +80,6 @@ def addVideoFramesToCsv(directory, file):
     video = load_mp4(full_path)
 
     # Load model
-    id = 'a2'
-    mode = 'stream'
-    version = '3'
-    hub_url = f'https://tfhub.dev/tensorflow/movinet/{id}/{mode}/kinetics-600/classification/{version}'
-    model = hub.load(hub_url)
-
     # Prepare CSV file
     csv_file = open('impact.csv', mode='a', newline='')
     csv_writer = csv.writer(csv_file)
@@ -86,22 +93,18 @@ def addVideoFramesToCsv(directory, file):
     n=0
     for m in tqdm.tqdm(range(n+1, len(video))):
         # Initialize states
-        init_states = model.init_states(video[tf.newaxis, ...].shape)
-        states = init_states
+        init_state = model.init_states(video[tf.newaxis, ...].shape)
 
         # Process the nth frame
-        inputs = states
+        inputs = init_state.copy()
         inputs['image'] = video[tf.newaxis, n:n+1, ...]
-        logits, states = model(inputs)
+        logits, state = model(inputs)
         probs_nth = tf.nn.softmax(logits[0], axis=-1)
 
-        # Reset states
-        states = init_states
-
         # Process the mth frame
-        inputs = states
+        inputs = state
         inputs['image'] = video[tf.newaxis, m:m+1, ...]
-        logits, states = model(inputs)
+        logits, state = model(inputs)
         probs_mth = tf.nn.softmax(logits[0], axis=-1)
 
         # Get top k labels for the mth frame
