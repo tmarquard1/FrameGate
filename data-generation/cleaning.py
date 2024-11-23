@@ -79,6 +79,8 @@ def addVideoFramesToCsv(directory, file):
     # Load video
     video = load_mp4(full_path)
 
+    model = tf.saved_model.load(str(local_model_path))
+
     # Load model
     # Prepare CSV file
     csv_file = open('impact.csv', mode='a', newline='')
