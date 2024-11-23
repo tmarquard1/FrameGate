@@ -14,3 +14,4 @@ tqdm==4.66.6
 pillow==10.4.0
 pathlib==1.0.1
 pandas
+kagglehub
