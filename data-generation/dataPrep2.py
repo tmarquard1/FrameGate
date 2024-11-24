@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 import csv
 import tqdm
-from concurrent.futures import ThreadPoolExecutor, as_completed
+from multiprocessing import Pool, cpu_count
 
 # Read the CSV file
 csv_file_path = 'cleaned_impact.csv'
@@ -38,17 +38,20 @@ def process_row(row, image_size=(224, 224)):
 
     return [video_path, frame_n_index, frame_m_index, perceived_change] + frame_data.tolist()
 
-def write_frame_data_to_csv(data, output_csv_path, image_size=(224, 224), max_workers=1):
+def write_frame_data_to_csv(data, output_csv_path, image_size=(224, 224), num_workers=None):
+    if num_workers is None:
+        num_workers = cpu_count()
+
     with open(output_csv_path, mode='w', newline='') as file:
         writer = csv.writer(file)
         # Write the header
         header = ['Video', 'Frame n', 'Frame m', 'Perceived Change'] + [f'Pixel_{i}' for i in range(image_size[0] * image_size[1] * 3 * 2)]
         writer.writerow(header)
         
-        with ThreadPoolExecutor(max_workers=max_workers) as executor:
-            futures = [executor.submit(process_row, row, image_size) for index, row in data.iterrows()]
-            for future in tqdm.tqdm(as_completed(futures), total=len(futures)):
-                writer.writerow(future.result())
+        with Pool(processes=num_workers) as pool:
+            results = list(tqdm.tqdm(pool.imap(process_row, [row for _, row in data.iterrows()]), total=len(data)))
+            for result in results:
+                writer.writerow(result)
 
 # Write the frame data to a CSV file
 output_csv_path = 'frame_data.csv'
