@@ -8,6 +8,7 @@ import cv2
 import os
 import csv
 import matplotlib.pyplot as plt
+import multiprocessing
 
 data_directory = "../HumanActivityRecognition-VideoDataset"
 
@@ -62,5 +63,11 @@ def writeVideoFrameToFile(directory, file, output_directory):
 
 files = getAllFilesInDirectory(data_directory)
 frames_directory = "../frames"
-for file in files:
+
+def process_file(file):
     writeVideoFrameToFile(data_directory, file, frames_directory)
+
+if __name__ == "__main__":
+    with multiprocessing.Pool() as pool:
+        for _ in tqdm.tqdm(pool.imap_unordered(process_file, files), total=len(files)):
+            pass
