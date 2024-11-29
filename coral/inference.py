@@ -31,7 +31,9 @@ async def predict(file: UploadFile = File(...)):
     
     # Open the image and resize it
     img = Image.open(io.BytesIO(contents)).resize((224, 224))
-    img = img/255.0
+    
+    # Convert the image to a NumPy array and normalize it
+    img = np.array(img) / 255.0
 
     # Perform inference
     common.set_input(interpreter, img)

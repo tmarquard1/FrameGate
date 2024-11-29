@@ -52,9 +52,9 @@ RUN python3 --version && pip --version
 # Clean up
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 
-COPY coral/inference.py coral/inference.py
-
 COPY coral/movinet_stream_a2_edgetpu.tflite movinet_stream_a2_edgetpu.tflite
+
+COPY coral/inference.py coral/inference.py
 
 RUN mkdir -p /Downloads
 
