@@ -41,7 +41,7 @@ RUN wget -O imagenet_labels.txt https://dl.google.com/coral/canned_models/imagen
 RUN wget -O mobilenet_v2_1.0_224_inat_bird_quant_edgetpu.tflite https://dl.google.com/coral/canned_models/mobilenet_v2_1.0_224_inat_bird_quant_edgetpu.tflite
 RUN wget -O inat_bird_labels.txt https://dl.google.com/coral/canned_models/inat_bird_labels.txt
 
-
+RUN wget -O https://raw.githubusercontent.com/tensorflow/models/f8af2291cced43fc9f1d9b41ddbf772ae7b0d7d2/official/projects/movinet/files/kinetics_600_labels.txt
 
 COPY requirements.txt requirements.txt
 RUN pip install -r requirements.txt
@@ -53,6 +53,8 @@ RUN python3 --version && pip --version
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 
 COPY coral/inference.py coral/inference.py
+
+COPY coral/movinet_stream_a2_edgetpu.tflite movinet_stream_a2_edgetpu.tflite
 
 RUN mkdir -p /Downloads
 

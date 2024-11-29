@@ -11,11 +11,11 @@ import os
 from datetime import datetime
 
 app = FastAPI()
-interpreter = make_interpreter('mobilenet_v1_1.0_224_edgetpu.tflite')
+interpreter = make_interpreter('movinet_stream_a2_edgetpu.tflite')
 interpreter.allocate_tensors()
 
 # Load labels
-with open('imagenet_labels.txt', 'r') as f:
+with open('kinetics_600_labels.txt', 'r') as f:
     labels = {i: line.strip() for i, line in enumerate(f.readlines())}
 
 @app.post("/predict/")
@@ -30,6 +30,7 @@ async def predict(file: UploadFile = File(...)):
     
     # Open the image and resize it
     img = Image.open(io.BytesIO(contents)).resize((224, 224))
+    img = img/255.0
 
     # Perform inference
     common.set_input(interpreter, img)

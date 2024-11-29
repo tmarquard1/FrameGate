@@ -42,3 +42,30 @@ https://arxiv.org/abs/2103.11511
 https://www.tensorflow.org/tutorials/video/transfer_learning_with_movinet
 
 https://github.com/tensorflow/models/tree/master/official/vision
+
+
+
+https://colab.research.google.com/github/google-coral/tutorials/blob/master/compile_for_edgetpu.ipynb#scrollTo=joxrIB0I3cdi
+
+Edge TPU Compiler version 16.0.384591198
+Started a compilation timeout timer of 180 seconds.
+
+Model compiled successfully in 141 ms.
+
+Input model: 1.tflite
+Input size: 5.11MiB
+Output model: 1_edgetpu.tflite
+Output size: 5.09MiB
+On-chip memory used for caching model parameters: 18.00KiB
+On-chip memory remaining for caching model parameters: 6.86MiB
+Off-chip memory used for streaming uncached model parameters: 0.00B
+Number of Edge TPU subgraphs: 1
+Total number of operations: 368
+Operation log: 1_edgetpu.log
+
+Model successfully compiled but not all operations are supported by the Edge TPU. A percentage of the model will instead run on the CPU, which is slower. If possible, consider updating your model to use only operations supported by the Edge TPU. For details, visit g.co/coral/model-reqs.
+Number of operations that will run on Edge TPU: 15
+Number of operations that will run on CPU: 353
+See the operation log file for individual operation details.
+Compilation child process completed within timeout period.
+Compilation succeeded! 
