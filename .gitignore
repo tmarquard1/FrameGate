@@ -7,3 +7,8 @@ HumanActivityRecognition-VideoDataset/
 myenv/
 trainingenv/
 .DS_Store
+*.png
+*.jpg
+*.csv
+*.zip
+*.mp4
