@@ -11,7 +11,8 @@ import os
 from datetime import datetime
 
 app = FastAPI()
-interpreter = make_interpreter('movinet_stream_a2_edgetpu.tflite')
+# Note this is version 1 of the model
+interpreter = make_interpreter('movinet_stream_a2_edgetpu.tflite') 
 interpreter.allocate_tensors()
 
 # Load labels
