@@ -1,12 +1,14 @@
+fastapi>=0.109.1,<0.110.0
+pydantic>=1.8.0,<2.0.3
+uvicorn>=0.15.0,<0.24.0
+numpy<2
+python-multipart==0.0.12
 tensorflow==2.17.0
 tensorflow-datasets==4.9.6
 tensorflow-hub==0.16.1
 tensorflow-io-gcs-filesystem==0.37.1
 tensorflow-metadata==1.16.1
 tensorflow-probability==0.24.0
-matplotlib==3.8.0
-matplotlib-inline==0.1.7
-matplotlib-venn==1.1.1
 mediapy==1.2.2
 opencv-python-headless<4.3
 numpy==1.26.4

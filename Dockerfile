@@ -6,6 +6,9 @@ ENV HOME /home
 
 RUN wget -O kinetics_600_labels.txt https://raw.githubusercontent.com/tensorflow/models/f8af2291cced43fc9f1d9b41ddbf772ae7b0d7d2/official/projects/movinet/files/kinetics_600_labels.txt
 
+COPY requirements.txt requirements.txt
+RUN pip install -r requirements.txt
+
 # Download and save the movinet model using Python
 RUN python3 -c "\
 import tensorflow as tf; \
@@ -19,9 +22,6 @@ local_model_path = Path('/home/movinet_model'); \
 local_model_path.mkdir(parents=True, exist_ok=True); \
 model = hub.load(hub_url); \
 tf.saved_model.save(model, str(local_model_path))"
-
-COPY requirements.txt requirements.txt
-RUN pip install -r requirements.txt
 
 # Verify installation
 RUN python3 --version && pip --version

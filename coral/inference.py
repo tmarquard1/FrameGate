@@ -7,6 +7,7 @@ import uvicorn
 import os
 from datetime import datetime
 import tensorflow as tf
+import pathlib
 
 app = FastAPI()
 
@@ -14,9 +15,31 @@ app = FastAPI()
 model_path = '/home/movinet_model'
 model = tf.saved_model.load(model_path)
 
-# Load labels
-with open('kinetics_600_labels.txt', 'r') as f:
-    labels = {i: line.strip() for i, line in enumerate(f.readlines())}
+
+labels_path = tf.keras.utils.get_file(
+    fname='labels.txt',
+    origin='https://raw.githubusercontent.com/tensorflow/models/f8af2291cced43fc9f1d9b41ddbf772ae7b0d7d2/official/projects/movinet/files/kinetics_600_labels.txt'
+)
+labels_path = pathlib.Path('kinetics_600_labels.txt')
+lines = labels_path.read_text().splitlines()
+KINETICS_600_LABELS = np.array([line.strip() for line in lines])
+
+# Function to get top k labels and probabilities
+def get_top_k(probs, k=5, label_map=KINETICS_600_LABELS):
+    top_predictions = tf.argsort(probs, axis=-1, direction='DESCENDING')[:k]
+    top_labels = tf.gather(label_map, top_predictions, axis=-1)
+    top_labels = [label.decode('utf8') for label in top_labels.numpy()]
+    top_probs = tf.gather(probs, top_predictions, axis=-1).numpy()
+    return tuple(zip(top_labels, top_probs))
+
+def load_images(image_files, image_size=(224, 224)):
+    frames = []
+    for image_file in image_files:
+        img = Image.open(io.BytesIO(image_file)).resize(image_size)
+        img = np.array(img) / 255.0
+        frames.append(img)
+    video = tf.convert_to_tensor(frames, dtype=tf.float32)
+    return video
 
 @app.post("/predict/")
 async def predict(file: UploadFile = File(...)):
@@ -28,22 +51,23 @@ async def predict(file: UploadFile = File(...)):
     with open(file_path, "wb") as f:
         f.write(contents)
     
-    # Open the image and resize it
-    img = Image.open(io.BytesIO(contents)).resize((224, 224))
+    # Load images
+    images = [contents]  # Assuming a single image for now
+    video = load_images(images)
     
-    # Convert the image to a NumPy array and normalize it
-    img = np.array(img) / 255.0
-
     # Initialize states
-    init_state = model.init_states(img[tf.newaxis, ...].shape)
+    init_state = model.init_states(video[tf.newaxis, ...].shape)
 
     # Perform inference
+    n = 0
     inputs = init_state.copy()
-    inputs['image'] = img[tf.newaxis, ...]
+    inputs['image'] = video[tf.newaxis, n:n+1, ...]
     logits, state = model(inputs)
     probs = tf.nn.softmax(logits[0], axis=-1)
-    top_k = tf.argsort(probs, axis=-1, direction='DESCENDING')[:3]
-    results = [{"label": labels[i], "score": float(probs[i])} for i in top_k.numpy()]
+    
+    # Use get_top_k function to get top predictions
+    top_k_predictions = get_top_k(probs, k=3)
+    results = [{"label": label, "score": float(score)} for label, score in top_k_predictions]
     
     return JSONResponse(content={"predictions": results})
 
