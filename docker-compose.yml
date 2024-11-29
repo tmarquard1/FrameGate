@@ -17,6 +17,9 @@ services:
 
     devices:
       - /dev/bus/usb:/dev/bus/usb
+
+    ports:
+      - 8000:8000
     # volumes:
     #   - .:/home
       
