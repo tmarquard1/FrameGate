@@ -14,14 +14,12 @@ services:
           - type=registry,ref=ghcr.io/tmarquard1/framegate:cache
         cache-to:
           - mode=max,image-manifest=true,oci-mediatypes=true,type=registry,ref=ghcr.io/tmarquard1/framegate:cache
-
     devices:
       - /dev/bus/usb:/dev/bus/usb
-
     ports:
       - 8000:8000
-    # volumes:
-    #   - .:/home
+    volumes:
+      - .:/Downloads
       
     init: true
 

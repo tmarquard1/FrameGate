@@ -24,7 +24,7 @@ photo_stream.seek(0)  # Rewind the stream to the beginning
 picam2.stop()
 
 # Send the photo to the endpoint
-url = 'http://mathias.local:8000/predict/'
+url = 'http://heron.local:8000/predict/'
 files = {'file': ('new_image.jpg', photo_stream, 'image/jpeg')}
 headers = {'accept': 'application/json'}
 

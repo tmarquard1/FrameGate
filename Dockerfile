@@ -54,6 +54,8 @@ RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 
 COPY coral/inference.py coral/inference.py
 
+RUN mkdir -p /Downloads
+
 EXPOSE 8000
 # uvicorn coral.inference:app --host 0.0.0.0 --port 8000 --reload
 ENTRYPOINT [ "uvicorn", "coral.inference:app", "--host", "0.0.0.0", "--port", "8000", "--reload" ]
