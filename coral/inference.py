@@ -1,19 +1,18 @@
 from fastapi import FastAPI, File, UploadFile
 from fastapi.responses import JSONResponse
-from pycoral.adapters import common
-from pycoral.adapters import classify
-from pycoral.utils.edgetpu import make_interpreter
 import numpy as np
 import io
 from PIL import Image
 import uvicorn
 import os
 from datetime import datetime
+import tensorflow as tf
 
 app = FastAPI()
-# Note this is version 1 of the model
-interpreter = make_interpreter('movinet_stream_a2_edgetpu.tflite') 
-interpreter.allocate_tensors()
+
+# Load the model from the saved path
+model_path = '/home/movinet_model'
+model = tf.saved_model.load(model_path)
 
 # Load labels
 with open('kinetics_600_labels.txt', 'r') as f:
@@ -35,11 +34,16 @@ async def predict(file: UploadFile = File(...)):
     # Convert the image to a NumPy array and normalize it
     img = np.array(img) / 255.0
 
+    # Initialize states
+    init_state = model.init_states(img[tf.newaxis, ...].shape)
+
     # Perform inference
-    common.set_input(interpreter, img)
-    interpreter.invoke()
-    classes = classify.get_classes(interpreter, top_k=3)
-    results = [{"label": labels[c.id], "score": float(c.score)} for c in classes]
+    inputs = init_state.copy()
+    inputs['image'] = img[tf.newaxis, ...]
+    logits, state = model(inputs)
+    probs = tf.nn.softmax(logits[0], axis=-1)
+    top_k = tf.argsort(probs, axis=-1, direction='DESCENDING')[:3]
+    results = [{"label": labels[i], "score": float(probs[i])} for i in top_k.numpy()]
     
     return JSONResponse(content={"predictions": results})
 

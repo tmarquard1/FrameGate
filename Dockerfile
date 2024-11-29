@@ -1,58 +1,30 @@
-FROM python:3.9
+FROM python:3.10
 
 WORKDIR /home
 ENV HOME /home
 
-# Update and install necessary packages
-RUN apt-get update && apt-get install -y \
-    git \
-    nano \
-    pkg-config \
-    wget \
-    usbutils \
-    curl \
-    gnupg \
-    software-properties-common \
-    gdal-bin \
-    libgdal-dev
-
-# Set GDAL environment variables
-ENV CPLUS_INCLUDE_PATH=/usr/include/gdal
-ENV C_INCLUDE_PATH=/usr/include/gdal
-
-# Add Coral Edge TPU repository
-RUN echo "deb https://packages.cloud.google.com/apt coral-edgetpu-stable main" \
-    | tee /etc/apt/sources.list.d/coral-edgetpu.list
-RUN curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add -
-RUN apt-get update
-
-# Install Edge TPU runtime
-RUN apt-get install -y libedgetpu1-std
-
-# RUN apt-get install -y python3-pycoral
-# Install python3-pycoral and tflite_runtime using pip
-RUN pip install https://github.com/google-coral/pycoral/releases/download/v2.0.0/tflite_runtime-2.5.0.post1-cp39-cp39-linux_aarch64.whl
-RUN pip install https://github.com/google-coral/pycoral/releases/download/v2.0.0/pycoral-2.0.0-cp39-cp39-linux_aarch64.whl
-
-# Download the mobilenet model
-RUN wget -O mobilenet_v1_1.0_224_edgetpu.tflite https://dl.google.com/coral/canned_models/mobilenet_v1_1.0_224_quant_edgetpu.tflite
-RUN wget -O imagenet_labels.txt https://dl.google.com/coral/canned_models/imagenet_labels.txt
-
-RUN wget -O mobilenet_v2_1.0_224_inat_bird_quant_edgetpu.tflite https://dl.google.com/coral/canned_models/mobilenet_v2_1.0_224_inat_bird_quant_edgetpu.tflite
-RUN wget -O inat_bird_labels.txt https://dl.google.com/coral/canned_models/inat_bird_labels.txt
 
 RUN wget -O kinetics_600_labels.txt https://raw.githubusercontent.com/tensorflow/models/f8af2291cced43fc9f1d9b41ddbf772ae7b0d7d2/official/projects/movinet/files/kinetics_600_labels.txt
+
+# Download and save the movinet model using Python
+RUN python3 -c "\
+import tensorflow as tf; \
+import tensorflow_hub as hub; \
+from pathlib import Path; \
+model_id = 'a2'; \
+model_mode = 'stream'; \
+model_version = '3'; \
+hub_url = f'https://tfhub.dev/tensorflow/movinet/{model_id}/{model_mode}/kinetics-600/classification/{model_version}'; \
+local_model_path = Path('/home/movinet_model'); \
+local_model_path.mkdir(parents=True, exist_ok=True); \
+model = hub.load(hub_url); \
+tf.saved_model.save(model, str(local_model_path))"
 
 COPY requirements.txt requirements.txt
 RUN pip install -r requirements.txt
 
 # Verify installation
 RUN python3 --version && pip --version
-
-# Clean up
-RUN apt-get clean && rm -rf /var/lib/apt/lists/*
-
-COPY coral/movinet_stream_a2_edgetpu.tflite movinet_stream_a2_edgetpu.tflite
 
 COPY coral/inference.py coral/inference.py
 
