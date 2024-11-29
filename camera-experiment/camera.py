@@ -17,6 +17,9 @@ picam2.start()
 photo_stream = io.BytesIO()
 image = picam2.capture_array()
 img = Image.fromarray(image)
+# Rotate the image 180 degrees
+img = img.rotate(180)
+
 img.save(photo_stream, format='jpeg')
 photo_stream.seek(0)  # Rewind the stream to the beginning
 
