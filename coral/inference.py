@@ -15,6 +15,7 @@ app = FastAPI()
 model_path = '/home/movinet_model'
 model = tf.saved_model.load(model_path)
 
+
 labels_path = pathlib.Path('kinetics_600_labels.txt')
 lines = labels_path.read_text().splitlines()
 KINETICS_600_LABELS = np.array([line.strip() for line in lines])
@@ -57,7 +58,10 @@ async def predict(file: UploadFile = File(...)):
     
     # Initialize states
     if len(images) == 1:
+        print("Initializing states...")
         init_state = model.init_states(video[tf.newaxis, ...].shape)
+    else:
+        print(f"Updating states...{len(images)}")
 
     # Perform inference
     inputs = init_state.copy()
