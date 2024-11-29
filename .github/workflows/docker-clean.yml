@@ -1,0 +1,24 @@
+name: Docker Clean Up
+
+on:
+  schedule:
+    - cron: '0 0 * * 0' # Runs every Sunday at midnight
+  workflow_dispatch:
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Login to GitHub Container Registry
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+      - name: List and delete untagged images
+        run: |
+          images=$(gh api -H "Accept: application/vnd.github.v3+json" /user/packages/container/YOUR_PACKAGE_NAME/versions | jq -r '.[] | select(.metadata.container.tags | length == 0) | .id')
+          for image in $images; do
+            gh api --method DELETE -H "Accept: application/vnd.github.v3+json" /user/packages/container/YOUR_PACKAGE_NAME/versions/$image
+          done
