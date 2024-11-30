@@ -26,6 +26,9 @@ try:
         
         # Rotate the image 180 degrees
         img = img.rotate(180)
+
+        # Convert the image to RGB mode
+        img = img.convert("RGB")
         
         # Save the image to an in-memory byte stream
         photo_stream = io.BytesIO()
@@ -40,7 +43,7 @@ try:
         print(response.json())
         
         # Sleep for a short duration to control the frame rate
-        time.sleep(1)  # Adjust the sleep duration as needed
+        time.sleep(2)  # Adjust the sleep duration as needed
 
 except KeyboardInterrupt:
     # Stop the camera when interrupted
