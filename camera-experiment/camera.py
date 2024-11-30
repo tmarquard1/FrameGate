@@ -49,3 +49,11 @@ except KeyboardInterrupt:
     # Stop the camera when interrupted
     picam2.stop()
     print("Video capture stopped.")
+    
+    # Make a POST request to /generate/video/
+    generate_video_url = 'http://heron.local:8000/generate/video/'
+    try:
+        response = requests.post(generate_video_url, headers=headers)
+        print("Video generation response:", response.json())
+    except requests.RequestException as e:
+        print("Failed to generate video:", e)
