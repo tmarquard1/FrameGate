@@ -55,12 +55,7 @@ async def predict(file: UploadFile = File(...)):
     global images, init_state, n
     
     contents = await file.read()
-    
-    # Save the file with a timestamped name in /Downloads
     timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
-    file_path = f"/Downloads/{timestamp}_{file.filename}"
-    with open(file_path, "wb") as f:
-        f.write(contents)
     
     # Load images
     images.append(contents)  # Assuming a single image for now
@@ -91,6 +86,36 @@ async def predict(file: UploadFile = File(...)):
     img.save(f"/Downloads/{timestamp}_overlay_{file.filename}")
 
     return JSONResponse(content={"predictions": results})
+
+@app.post("/generate/video/")
+async def generate_video():
+    image_folder = "/Downloads"
+    video_path = f"{image_folder}/output_video.mp4"
+    
+    # Get list of image files
+    images = [img for img in os.listdir(image_folder) if img.endswith("_overlay_frame.jpg")]
+    images.sort()  # Ensure images are in the correct order
+    
+    if not images:
+        return JSONResponse(content={"error": "No images found to compile into a video."}, status_code=404)
+    
+    # Read the first image to get dimensions
+    first_image_path = os.path.join(image_folder, images[0])
+    frame = cv2.imread(first_image_path)
+    height, width, layers = frame.shape
+    
+    # Define the codec and create VideoWriter object
+    fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+    video = cv2.VideoWriter(video_path, fourcc, 1, (width, height))
+    
+    for image in images:
+        image_path = os.path.join(image_folder, image)
+        frame = cv2.imread(image_path)
+        video.write(frame)
+    
+    video.release()
+    
+    return JSONResponse(content={"video_path": video_path})
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)
