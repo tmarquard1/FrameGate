@@ -43,7 +43,7 @@ try:
         print(response.json())
         
         # Sleep for a short duration to control the frame rate
-        time.sleep(2)  # Adjust the sleep duration as needed
+        time.sleep(.5)  # Adjust the sleep duration as needed
 
 except KeyboardInterrupt:
     # Stop the camera when interrupted
