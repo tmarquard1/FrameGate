@@ -43,7 +43,8 @@ def load_images(image_files, image_size=(224, 224)):
 def overlay_text_on_image(image, text):
     draw = ImageDraw.Draw(image)
     font = ImageFont.load_default()
-    text_size = draw.textsize(text, font=font)
+    text_bbox = draw.textbbox((0, 0), text, font=font)
+    text_size = (text_bbox[2] - text_bbox[0], text_bbox[3] - text_bbox[1])
     position = (10, 10)
     draw.rectangle([position, (position[0] + text_size[0], position[1] + text_size[1])], fill="black")
     draw.text(position, text, fill="white", font=font)
