@@ -9,6 +9,7 @@ from datetime import datetime
 import tensorflow as tf
 import pathlib
 import cv2
+import time
 
 app = FastAPI()
 
@@ -54,6 +55,7 @@ def overlay_text_on_image(image, text):
 async def predict(file: UploadFile = File(...)):
     global images, init_state, n
     
+    start_time = time.time()  # Start timing
     contents = await file.read()
     timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
     
@@ -84,6 +86,10 @@ async def predict(file: UploadFile = File(...)):
     img = Image.open(io.BytesIO(contents)).resize((224, 224))
     img = overlay_text_on_image(img, f"{top_label}: {top_score:.2f}")
     img.save(f"/Downloads/{timestamp}_overlay_{file.filename}")
+
+    end_time = time.time()  # End timing
+    processing_time = end_time - start_time
+    print(f"Processing time for frame: {processing_time:.2f} seconds")
 
     return JSONResponse(content={"predictions": results})
 
