@@ -60,7 +60,7 @@ async def predict(file: UploadFile = File(...)):
     timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
     
     # Load images
-    images.append(Image.open(io.BytesIO(contents)).resize((224, 224)))  # Assuming a single image for now
+    images.append(contents)  # Assuming a single image for now
     video = load_images(images)
     
     # Initialize states
