@@ -60,7 +60,7 @@ async def predict(file: UploadFile = File(...)):
     timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
     
     # Load images
-    images.append(contents)  # Assuming a single image for now
+    images.append(Image.open(io.BytesIO(contents)).resize((224, 224)))  # Assuming a single image for now
     video = load_images(images)
     
     # Initialize states
@@ -83,7 +83,7 @@ async def predict(file: UploadFile = File(...)):
     results = [{"label": top_label, "score": float(top_score)}]
 
     # Overlay text on image
-    img = Image.open(io.BytesIO(contents)).resize((224, 224))
+    img = Image.open(io.BytesIO(contents))  # .resize((224, 224))
     img = overlay_text_on_image(img, f"{top_label}: {top_score:.2f}")
     img.save(f"/Downloads/{timestamp}_overlay_{file.filename}")
 
